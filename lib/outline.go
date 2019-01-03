@@ -9,9 +9,10 @@ import (
 
 // Doc is is a documentation document
 type Doc struct {
-	Name      string
-	Functions []*Function
-	Types     []*Type
+	Name        string
+	Description string
+	Functions   []*Function
+	Types       []*Type
 }
 
 // MarshalIndent writes doc to a string with depth & prefix
@@ -21,6 +22,11 @@ func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 		buf.WriteString(strings.Repeat(prefix, depth) + DocumentTok.String() + "\n")
 	} else {
 		buf.WriteString(fmt.Sprintf("%s%s: %s\n", strings.Repeat(prefix, depth), DocumentTok.String(), d.Name))
+	}
+	if d.Description != "" {
+		depth++
+		buf.WriteString(strings.Repeat(prefix, depth) + d.Description + "\n")
+		depth--
 	}
 	if d.Functions != nil {
 		depth++
@@ -55,7 +61,11 @@ func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 				buf.WriteString(strings.Repeat(prefix, depth) + FieldsTok.String() + ":\n")
 				depth++
 				for _, f := range t.Fields {
-					buf.WriteString(strings.Repeat(prefix, depth) + f.Name + "\n")
+					buf.WriteString(strings.Repeat(prefix, depth) + f.Name)
+					if f.Type != "" {
+						buf.WriteString(" " + f.Type)
+					}
+					buf.WriteString("\n")
 				}
 				depth -= 2
 			}
@@ -82,8 +92,8 @@ type Type struct {
 }
 
 type Field struct {
-	Name string
-	// Type string
+	Name        string
+	Type        string
 	Description string
 }
 

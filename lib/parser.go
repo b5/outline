@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 // Parse consumes a reader of outline data, creating a outline document
@@ -91,15 +92,28 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 
 	for {
 		tok := p.scan()
+		if p.indent < baseIndent {
+			p.unscan()
+			return
+		}
+
+		// fmt.Printf("%s %s\n", tok.Type, tok.Text)
 		switch tok.Type {
 		case FunctionsTok:
-			if doc.Functions, err = p.readFunctions(baseIndent + 1); err != nil {
+			if doc.Functions, err = p.readFunctions(p.indent); err != nil {
 				return
 			}
 		case TypesTok:
-			if doc.Types, err = p.readTypes(baseIndent + 1); err != nil {
+			if doc.Types, err = p.readTypes(p.indent); err != nil {
 				return
 			}
+		case TextTok:
+			p.unscan()
+			text, err := p.readMultilineText(p.indent)
+			if err != nil {
+				return doc, err
+			}
+			doc.Description = text
 		default:
 			p.unscan()
 			return
@@ -126,7 +140,7 @@ func (p *parser) readFunction(baseIndent int) (fn *Function, err error) {
 	}
 
 	fn = &Function{Signature: tok.Text}
-	fn.Description, err = p.readText(baseIndent + 1)
+	fn.Description, err = p.readMultilineText(baseIndent + 1)
 	return
 }
 
@@ -176,7 +190,7 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 			// case TextTok:
 			// fmt.Println("text?")
 			// p.unscan()
-			// t.Description, err = p.readText(baseIndent + 1)
+			// t.Description, err = p.readMultilineText(baseIndent + 1)
 		}
 	}
 }
@@ -197,7 +211,16 @@ func (p *parser) readField(baseIndent int) (field *Field, err error) {
 		p.unscan()
 		return
 	}
-	field = &Field{Name: tok.Text}
+	// TODO (b5): hack. acutally parse this stuff using the lexer
+	spl := strings.Split(tok.Text, " ")
+	if len(spl) > 0 {
+		field = &Field{
+			Name: spl[0],
+			Type: spl[1],
+		}
+	} else {
+		field = &Field{Name: tok.Text}
+	}
 	return
 }
 
@@ -221,10 +244,10 @@ func (p *parser) readOperator(baseIndent int) (op *Operator, err error) {
 	return
 }
 
-func (p *parser) readText(baseIndent int) (str string, err error) {
+func (p *parser) readMultilineText(baseIndent int) (str string, err error) {
 	for {
 		tok := p.scan()
-		// fmt.Printf("readText %d %d %s %#v\n", baseIndent, p.indent, tok.Type, tok)
+		// fmt.Printf("readMultilineText base: %d indent: %d %s %#v\n", baseIndent, p.indent, tok.Type, tok.Text)
 		if p.indent < baseIndent || tok.Type != TextTok {
 			p.unscan()
 			return

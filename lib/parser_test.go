@@ -103,6 +103,40 @@ var time = &Doc{
 	},
 }
 
+const docWithDescriptionTabs = `outline: doc
+	this is a document description.
+	It's written across two lines
+	functions:
+		sum(a int, b int) int`
+
+var docWithDescription = &Doc{
+	Name:        "doc",
+	Description: "this is a document description. It's written across two lines",
+	Functions: []*Function{
+		{Signature: "sum(a int, b int) int"},
+	},
+}
+
+const huhSpaces = `  outline: time
+  time defines time primitives for starlark
+  this is a second line of description
+  functions:
+    duration(string) duration
+			parse a duration
+		date() date
+			make a date`
+
+var huh = &Doc{
+	Name:        "time",
+	Description: "time defines time primitives for starlark this is a second line of description",
+	Functions: []*Function{
+		{Signature: "duration(string) duration",
+			Description: "parse a duration"},
+		{Signature: "date() date",
+			Description: "make a date"},
+	},
+}
+
 func TestParse(t *testing.T) {
 	cases := []struct {
 		in  string
@@ -113,6 +147,8 @@ func TestParse(t *testing.T) {
 		{twoFuncsTabs, twoFuncs, ""},
 		{twoFuncsSpaces, twoFuncs, ""},
 		{timeSpaces, time, ""},
+		{docWithDescriptionTabs, docWithDescription, ""},
+		{huhSpaces, huh, ""},
 	}
 
 	for i, c := range cases {

@@ -10,15 +10,40 @@ import (
 )
 
 const mdTmpl = `{{ range . }}
-# Package {{ .Name }}
-
+# {{ .Name }}
+{{ if ne .Description "" }}
 {{ .Description }}
-
-{{ if gt (len .Functions) 0}}
+{{- end }}
+{{ if gt (len .Functions) 0 }}
 ## Functions
-{{ range .Functions }}
-### {{ .Signature }}
+{{ range .Functions -}}
+#### \`{{ .Signature }}\`
 {{ .Description }}
+
+{{ end }}
+{{ end }}
+
+{{ if gt (len .Types) 0 }}
+## Types
+{{ range .Types -}}
+### \`{{ .Name }}\`
+{{ if ne .Description "" }}{{ .Description }}{{ end -}}
+{{ if gt (len .Fields) 0 }}
+**Fields**
+| name | type | description |
+|------|------|-------------|
+{{ range .Fields -}}
+| {{ .Name }} | {{ .Type }} | {{ .Description }} |
+{{ end }}
+{{ end }}
+{{ if gt (len .Operators) 0 }}
+**Operators**
+| operator | description |
+|----------|-------------|
+{{ range .Operators -}}
+| {{ .Opr }} | {{ .Description }} |
+{{ end }}
+{{ end }}
 {{ end }}
 {{ end }}
 
