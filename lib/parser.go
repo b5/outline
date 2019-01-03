@@ -1,4 +1,4 @@
-package outline
+package lib
 
 import (
 	"fmt"
@@ -61,8 +61,6 @@ func (p *parser) scan() (tok Token) {
 			return
 		}
 	}
-	// fmt.Printf("returning token outside loop: %s %#v\n", tok.Type, tok.Text)
-	return
 }
 
 func (p *parser) unscan() {
@@ -154,7 +152,7 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 
 	for {
 		tok = p.scan()
-		if p.indent < baseIndent {
+		if p.indent <= baseIndent {
 			p.unscan()
 			return
 		}
@@ -170,9 +168,15 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 			if err != nil {
 				return
 			}
-		case TextTok:
-			p.unscan()
-			t.Description, err = p.readText(baseIndent + 1)
+		default:
+			err = fmt.Errorf("unexpexted token: %s: %s %d %d", tok.Type, tok.Text, p.indent, baseIndent)
+			return
+
+			// TODO (b5): handle field descriptions
+			// case TextTok:
+			// fmt.Println("text?")
+			// p.unscan()
+			// t.Description, err = p.readText(baseIndent + 1)
 		}
 	}
 }

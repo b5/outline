@@ -1,4 +1,4 @@
-package outline
+package lib
 
 import (
 	"bytes"
@@ -59,7 +59,12 @@ outline: time
         duration - time = duration
         duration + time = time
         duration == duration = boolean
-        duration < duration = booleans`
+        duration < duration = booleans
+    time
+      fields:
+      operators:
+        time == time = boolean
+        time < time = boolean`
 
 var time = &Doc{
 	Name: "time",
@@ -86,6 +91,13 @@ var time = &Doc{
 				{Opr: "duration + time = time"},
 				{Opr: "duration == duration = boolean"},
 				{Opr: "duration < duration = booleans"},
+			},
+		},
+		{Name: "time",
+			Fields: []*Field{},
+			Operators: []*Operator{
+				{Opr: "time == time = boolean"},
+				{Opr: "time < time = boolean"},
 			},
 		},
 	},

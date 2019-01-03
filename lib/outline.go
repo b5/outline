@@ -1,5 +1,5 @@
 // Package outline generates starlark documentation from go code
-package outline
+package lib
 
 import (
 	"bytes"

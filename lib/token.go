@@ -1,4 +1,4 @@
-package outline
+package lib
 
 type Position struct {
 	Line, Col, Offset int

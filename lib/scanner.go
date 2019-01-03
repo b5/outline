@@ -1,4 +1,4 @@
-package outline
+package lib
 
 import (
 	"bufio"
