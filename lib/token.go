@@ -32,8 +32,8 @@ const (
 	TypesTok
 	FieldsTok
 	OperatorsTok
-	// ParamsTok
-	// ReturnTok
+	ParamsTok
+	ReturnTok
 	KeywordEnd
 )
 
@@ -56,10 +56,10 @@ func (t TokenType) String() string {
 		return "fields"
 	case OperatorsTok:
 		return "operators"
-	// case ParamsTok:
-	// 	return "params"
-	// case ReturnTok:
-	// 	return "return"
+	case ParamsTok:
+		return "params"
+	case ReturnTok:
+		return "return"
 	default:
 		return "unknown"
 	}

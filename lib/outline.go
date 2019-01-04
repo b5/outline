@@ -80,6 +80,16 @@ func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 type Function struct {
 	Signature   string
 	Description string
+	Params      []*Param
+	Return      string
+}
+
+// Param is an argument to a function
+type Param struct {
+	Name        string
+	Type        string
+	Optional    bool
+	Description string
 }
 
 // Type documents a constructed type

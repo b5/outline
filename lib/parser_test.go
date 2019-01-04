@@ -117,21 +117,27 @@ var docWithDescription = &Doc{
 	},
 }
 
-const huhSpaces = `  outline: time
-  time defines time primitives for starlark
-  this is a second line of description
+const huhSpaces = `  outline: huh
+  huh is a package that has no meaning or purpose
   functions:
-    duration(string) duration
-			parse a duration
-		date() date
-			make a date`
+    foo(bar string) int
+      foo a bar, which is to to a bar and remove 'd' from 'food'
+      params:
+        bar string
+          the name of a bar
+    date() date
+      make a date`
 
 var huh = &Doc{
-	Name:        "time",
-	Description: "time defines time primitives for starlark this is a second line of description",
+	Name:        "huh",
+	Description: "huh is a package that has no meaning or purpose",
 	Functions: []*Function{
-		{Signature: "duration(string) duration",
-			Description: "parse a duration"},
+		{Signature: "foo(bar string) int",
+			Description: "foo a bar, which is to to a bar and remove 'd' from 'food'",
+			Params: []*Param{
+				{Name: "bar", Type: "string", Description: "the name of a bar"},
+			},
+		},
 		{Signature: "date() date",
 			Description: "make a date"},
 	},

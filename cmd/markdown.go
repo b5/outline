@@ -3,13 +3,15 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/b5/outline/lib"
 	"github.com/spf13/cobra"
 )
 
-const mdTmpl = `{{ range . }}
+// backticks don't work with golang string literals, so use "'" as a stand-in & strings.Replace
+var mdTmpl = strings.Replace(`{{ range . }}
 # {{ .Name }}
 {{ if ne .Description "" }}
 {{ .Description }}
@@ -17,7 +19,7 @@ const mdTmpl = `{{ range . }}
 {{ if gt (len .Functions) 0 }}
 ## Functions
 {{ range .Functions -}}
-#### \`{{ .Signature }}\`
+#### '{{ .Signature }}'
 {{ .Description }}
 
 {{ end }}
@@ -26,7 +28,7 @@ const mdTmpl = `{{ range . }}
 {{ if gt (len .Types) 0 }}
 ## Types
 {{ range .Types -}}
-### \`{{ .Name }}\`
+### '{{ .Name }}'
 {{ if ne .Description "" }}{{ .Description }}{{ end -}}
 {{ if gt (len .Fields) 0 }}
 **Fields**
@@ -48,7 +50,7 @@ const mdTmpl = `{{ range . }}
 {{ end }}
 
 
-{{ end }}`
+{{ end }}`, "'", "`", -1)
 
 // MarkdownCmd converts an outline to a markdown document
 var MarkdownCmd = &cobra.Command{

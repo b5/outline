@@ -64,6 +64,10 @@ func (s *Scanner) Scan() Token {
 				return s.newTok(FieldsTok)
 			case "operators":
 				return s.newTok(OperatorsTok)
+			case "params":
+				return s.newTok(ParamsTok)
+			case "return":
+				return s.newTok(ReturnTok)
 			default:
 				s.text.WriteRune(':')
 			}

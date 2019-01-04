@@ -140,7 +140,63 @@ func (p *parser) readFunction(baseIndent int) (fn *Function, err error) {
 	}
 
 	fn = &Function{Signature: tok.Text}
-	fn.Description, err = p.readMultilineText(baseIndent + 1)
+	for {
+		tok := p.scan()
+		if p.indent <= baseIndent {
+			p.unscan()
+			return
+		}
+
+		// fmt.Printf("%s %s\n", tok.Type, tok.Text)
+		switch tok.Type {
+		case ParamsTok:
+			if fn.Params, err = p.readParams(p.indent); err != nil {
+				return
+			}
+		case ReturnTok:
+			if fn.Return, err = p.readMultilineText(p.indent); err != nil {
+				return
+			}
+		case TextTok:
+			p.unscan()
+			if fn.Description, err = p.readMultilineText(p.indent); err != nil {
+				return
+			}
+		default:
+			p.unscan()
+			return
+		}
+	}
+}
+
+func (p *parser) readParams(baseIndent int) (params []*Param, err error) {
+	for {
+		var param *Param
+		if param, err = p.readParam(baseIndent + 1); err != nil || param == nil {
+			return
+		}
+		params = append(params, param)
+	}
+}
+
+func (p *parser) readParam(baseIndent int) (param *Param, err error) {
+	tok := p.scan()
+	if p.indent < baseIndent || tok.Type != TextTok {
+		p.unscan()
+		return
+	}
+	// TODO (b5): hack. acutally parse this stuff using the lexer
+	spl := strings.Split(tok.Text, " ")
+	if len(spl) > 0 {
+		param = &Param{
+			Name: spl[0],
+			Type: spl[1],
+		}
+	} else {
+		param = &Param{Name: tok.Text}
+	}
+
+	param.Description, err = p.readMultilineText(baseIndent + 1)
 	return
 }
 
