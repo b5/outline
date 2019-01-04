@@ -29,11 +29,12 @@ const (
 	KeywordBegin
 	DocumentTok
 	FunctionsTok
-	TypesTok
-	FieldsTok
-	OperatorsTok
 	ParamsTok
 	ReturnTok
+	TypesTok
+	FieldsTok
+	MethodsTok
+	OperatorsTok
 	KeywordEnd
 )
 
@@ -48,6 +49,8 @@ func (t TokenType) String() string {
 
 	case DocumentTok:
 		return "outline"
+	case MethodsTok:
+		return "methods"
 	case FunctionsTok:
 		return "functions"
 	case TypesTok:

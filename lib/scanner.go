@@ -58,6 +58,8 @@ func (s *Scanner) Scan() Token {
 				return s.newTok(DocumentTok)
 			case "functions":
 				return s.newTok(FunctionsTok)
+			case "methods":
+				return s.newTok(MethodsTok)
 			case "types":
 				return s.newTok(TypesTok)
 			case "fields":

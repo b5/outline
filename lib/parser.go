@@ -229,24 +229,25 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 
 		switch tok.Type {
 		case FieldsTok:
-			t.Fields, err = p.readFields(baseIndent + 1)
-			if err != nil {
+			if t.Fields, err = p.readFields(p.indent); err != nil {
+				return
+			}
+		case MethodsTok:
+			if t.Methods, err = p.readFunctions(p.indent); err != nil {
 				return
 			}
 		case OperatorsTok:
-			t.Operators, err = p.readOperators(baseIndent + 1)
-			if err != nil {
+			if t.Operators, err = p.readOperators(p.indent); err != nil {
+				return
+			}
+		case TextTok:
+			p.unscan()
+			if t.Description, err = p.readMultilineText(p.indent); err != nil {
 				return
 			}
 		default:
 			err = fmt.Errorf("unexpexted token: %s: %s %d %d", tok.Type, tok.Text, p.indent, baseIndent)
 			return
-
-			// TODO (b5): handle field descriptions
-			// case TextTok:
-			// fmt.Println("text?")
-			// p.unscan()
-			// t.Description, err = p.readMultilineText(baseIndent + 1)
 		}
 	}
 }

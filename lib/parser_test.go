@@ -50,6 +50,11 @@ outline: time
 
   types:
     duration
+      a period of time
+      methods:
+        add(d duration) int
+          params:
+             d duration
       fields:
         hours float
         minutes float
@@ -80,6 +85,14 @@ var time = &Doc{
 	},
 	Types: []*Type{
 		{Name: "duration",
+			Description: "a period of time",
+			Methods: []*Function{
+				{Signature: "add(d duration) int",
+					Params: []*Param{
+						{Name: "d", Type: "duration"},
+					},
+				},
+			},
 			Fields: []*Field{
 				{Name: "hours float"},
 				{Name: "minutes float"},

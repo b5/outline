@@ -35,6 +35,6 @@ func init() {
 	RootCmd.PersistentFlags().Bool("debug", false, "show debug output")
 	RootCmd.AddCommand(
 		FmtCmd,
-		MarkdownCmd,
+		TemplateCmd,
 	)
 }
