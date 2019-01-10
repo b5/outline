@@ -136,7 +136,7 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 				return
 			}
 		case FunctionsTok:
-			if doc.Functions, err = p.readFunctions(p.indent); err != nil {
+			if doc.Functions, err = p.readFunctions(doc.Name, p.indent); err != nil {
 				return
 			}
 		case TypesTok:
@@ -157,17 +157,17 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 	}
 }
 
-func (p *parser) readFunctions(baseIndent int) (funcs []*Function, err error) {
+func (p *parser) readFunctions(receiver string, baseIndent int) (funcs []*Function, err error) {
 	for {
 		var fn *Function
-		if fn, err = p.readFunction(baseIndent + 1); err != nil || fn == nil {
+		if fn, err = p.readFunction(receiver, baseIndent+1); err != nil || fn == nil {
 			return
 		}
 		funcs = append(funcs, fn)
 	}
 }
 
-func (p *parser) readFunction(baseIndent int) (fn *Function, err error) {
+func (p *parser) readFunction(receiver string, baseIndent int) (fn *Function, err error) {
 	// read signature
 	tok := p.scan()
 	if p.indent < baseIndent || tok.Type != TextTok {
@@ -175,7 +175,7 @@ func (p *parser) readFunction(baseIndent int) (fn *Function, err error) {
 		return
 	}
 
-	fn = &Function{Signature: tok.Text}
+	fn = &Function{Receiver: receiver, Signature: tok.Text}
 	for {
 		tok := p.scan()
 		if p.indent <= baseIndent {
@@ -269,7 +269,7 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 				return
 			}
 		case MethodsTok:
-			if t.Methods, err = p.readFunctions(p.indent); err != nil {
+			if t.Methods, err = p.readFunctions(t.Name, p.indent); err != nil {
 				return
 			}
 		case OperatorsTok:

@@ -123,6 +123,7 @@ func (f Functions) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
 
 // Function documents a starlark function
 type Function struct {
+	Receiver    string // should be set by parsing context
 	Signature   string
 	Description string
 	Params      []*Param
