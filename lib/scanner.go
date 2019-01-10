@@ -6,11 +6,14 @@ import (
 	"strings"
 )
 
-func NewScanner(r io.Reader) *Scanner {
-	return &Scanner{r: bufio.NewReader(r)}
+// newScanner allocates a scanner from an io.Reader
+func newScanner(r io.Reader) *scanner {
+	return &scanner{r: bufio.NewReader(r)}
 }
 
-type Scanner struct {
+// scanner tokenizes an input stream
+// TODO(b5): set position properly for errors
+type scanner struct {
 	r *bufio.Reader
 
 	// scanning state
@@ -21,9 +24,10 @@ type Scanner struct {
 	err               error
 }
 
-func (s *Scanner) Scan() Token {
+// Scan reads one token from the input stream
+func (s *scanner) Scan() Token {
 	inText := false
-	s.text = strings.Builder{}
+	s.text.Reset()
 
 	if s.readNewline {
 		s.readNewline = false
@@ -39,7 +43,7 @@ func (s *Scanner) Scan() Token {
 				s.readNewline = true
 				return s.newTok(TextTok)
 			}
-			return s.newTok(EofTok)
+			return s.newTok(eofTok)
 		// ignore line feeds
 		case '\r':
 			continue
@@ -54,6 +58,8 @@ func (s *Scanner) Scan() Token {
 			return s.newTok(IndentTok)
 		case ':':
 			switch s.text.String() {
+			case "path":
+				return s.newTok(PathTok)
 			case "outline":
 				return s.newTok(DocumentTok)
 			case "functions":
@@ -89,7 +95,7 @@ func (s *Scanner) Scan() Token {
 
 // read reads the next rune from the buffered reader.
 // Returns the rune(0) if an error occurs (or io.EOF is returned).
-func (s *Scanner) read() rune {
+func (s *scanner) read() rune {
 	ch, _, err := s.r.ReadRune()
 	if err != nil {
 		return eof
@@ -97,7 +103,8 @@ func (s *Scanner) read() rune {
 	return ch
 }
 
-func (s *Scanner) newTok(t TokenType) Token {
+// newTok creates a new token from current scanner state
+func (s *scanner) newTok(t TokenType) Token {
 	return Token{
 		Type: t,
 		Text: strings.TrimSpace(s.text.String()),

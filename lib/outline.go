@@ -1,18 +1,46 @@
-// Package outline generates starlark documentation from go code
+// Package lib generates starlark documentation from go code
 package lib
 
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 )
+
+// Docs is a sortable slice of Doc pointers
+type Docs []*Doc
+
+// Len implements the sort.Sortable interface
+func (d Docs) Len() int { return len(d) }
+
+// Less implements the sort.Sortable interface
+func (d Docs) Less(i, j int) bool { return d[i].Path+d[i].Name < d[j].Path+d[j].Name }
+
+// Swap implements the sort.Sortable interface
+func (d Docs) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
+
+// Sort sorts all sortable fields in all docs, and the docs list itself
+func (d Docs) Sort() {
+	for _, doc := range d {
+		doc.Sort()
+	}
+	sort.Sort(d)
+}
 
 // Doc is is a documentation document
 type Doc struct {
 	Name        string
+	Path        string
 	Description string
-	Functions   []*Function
-	Types       []*Type
+	Functions   Functions
+	Types       Types
+}
+
+// Sort sorts all sortable fields in the document
+func (d *Doc) Sort() {
+	sort.Sort(d.Functions)
+	sort.Sort(d.Types)
 }
 
 // MarshalIndent writes doc to a string with depth & prefix
@@ -22,6 +50,11 @@ func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 		buf.WriteString(strings.Repeat(prefix, depth) + DocumentTok.String() + "\n")
 	} else {
 		buf.WriteString(fmt.Sprintf("%s%s: %s\n", strings.Repeat(prefix, depth), DocumentTok.String(), d.Name))
+	}
+	if d.Path != "" {
+		depth++
+		buf.WriteString(strings.Repeat(prefix, depth) + PathTok.String() + ": " + d.Path + "\n")
+		depth--
 	}
 	if d.Description != "" {
 		depth++
@@ -76,6 +109,18 @@ func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Functions is a sortable slice of Function pointers
+type Functions []*Function
+
+// Len implements the sort.Sortable interface
+func (f Functions) Len() int { return len(f) }
+
+// Less implements the sort.Sortable interface
+func (f Functions) Less(i, j int) bool { return f[i].Signature < f[j].Signature }
+
+// Swap implements the sort.Sortable interface
+func (f Functions) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
+
 // Function documents a starlark function
 type Function struct {
 	Signature   string
@@ -92,22 +137,40 @@ type Param struct {
 	Description string
 }
 
+// Types is a sortable slice of Type pointers
+type Types []*Type
+
+// Len implements the sort.Sortable interface
+func (t Types) Len() int { return len(t) }
+
+// Less implements the sort.Sortable interface
+func (t Types) Less(i, j int) bool { return t[i].Name < t[j].Name }
+
+// Swap implements the sort.Sortable interface
+func (t Types) Swap(i, j int) { t[i], t[j] = t[j], t[i] }
+
 // Type documents a constructed type
 type Type struct {
 	Name        string
 	Description string
-	Methods     []*Function
+	Methods     Functions
 	Fields      []*Field
 	Operators   []*Operator
 }
 
+// Sort sorts a Type pointer's Methods
+func (t *Type) Sort() {
+	sort.Sort(t.Methods)
+}
+
+// Field is a property of a constructed Type
 type Field struct {
 	Name        string
 	Type        string
 	Description string
 }
 
-// Operator documents
+// Operator documents boolean operation on a constructed type
 type Operator struct {
 	Opr         string
 	Description string

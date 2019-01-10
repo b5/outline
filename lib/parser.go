@@ -6,20 +6,44 @@ import (
 	"strings"
 )
 
-// Parse consumes a reader of outline data, creating a outline document
-func Parse(r io.Reader) (doc *Doc, err error) {
-	p := parser{s: NewScanner(r)}
-	doc, err = p.read()
-	if err == io.EOF {
-		err = nil
+// ParseFirst consumes a reader of outline data, creating and returning the first outline document
+// it encounters. ParseFirst consumes the entire reader
+// TODO(b5): don't consume the entire reader. return after the first complete document
+func ParseFirst(r io.Reader) (doc *Doc, err error) {
+	docs, err := Parse(r)
+	if err != nil {
+		return nil, err
 	}
 
-	return
+	if len(docs) > 0 {
+		return docs[0], nil
+	}
+	return nil, nil
+}
+
+// Parse consumes a reader of data that contains zero or more outlines
+// creating and returning any documents it finds
+func Parse(r io.Reader) (docs Docs, err error) {
+	p := parser{s: newScanner(r)}
+	for {
+		doc, err := p.read()
+		if doc == nil && err == nil {
+			return docs, nil
+		}
+		docs = append(docs, doc)
+		if err != nil {
+			if err == io.EOF {
+				docs = append(docs, doc)
+				return docs, nil
+			}
+			return nil, err
+		}
+	}
 }
 
 // parser is a state machine for serializing a documentation struct from a byte stream
 type parser struct {
-	s *Scanner
+	s *scanner
 
 	buf struct {
 		tok          Token
@@ -55,7 +79,7 @@ func (p *parser) scan() (tok Token) {
 			p.line++
 		case IndentTok:
 			p.indent++
-		case EofTok:
+		case eofTok:
 			return
 		default:
 			// fmt.Printf("returning token: %s %#v\n", tok.Type, tok.Text)
@@ -75,7 +99,7 @@ func (p *parser) read() (doc *Doc, err error) {
 		case DocumentTok:
 			doc, err = p.readDocument(p.indent)
 			return
-		case EofTok:
+		case eofTok:
 			return
 		}
 	}
@@ -99,6 +123,18 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 
 		// fmt.Printf("%s %s\n", tok.Type, tok.Text)
 		switch tok.Type {
+		case DocumentTok:
+			if p.indent == baseIndent {
+				p.unscan()
+				return
+			}
+
+			err = fmt.Errorf("outline documents cannot be nested")
+			return
+		case PathTok:
+			if doc.Path, err = p.readMultilineText(p.indent); err != nil {
+				return
+			}
 		case FunctionsTok:
 			if doc.Functions, err = p.readFunctions(p.indent); err != nil {
 				return

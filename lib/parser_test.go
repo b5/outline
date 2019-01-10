@@ -10,12 +10,14 @@ import (
 var differ = diffmatchpatch.New()
 
 const twoFuncsTabs = `outline: twoFuncs
+	path: twoFuncs
 	functions:
 		difference(a,b int) int
 		sum(a,b int) int
 			add two things together`
 
 const twoFuncsSpaces = `outline: twoFuncs
+	path: twoFuncs
   functions:
     difference(a,b int) int
     sum(a,b int) int
@@ -23,6 +25,7 @@ const twoFuncsSpaces = `outline: twoFuncs
 
 var twoFuncs = &Doc{
 	Name: "twoFuncs",
+	Path: "twoFuncs",
 	Functions: []*Function{
 		{
 			Signature: "difference(a,b int) int",
@@ -172,7 +175,7 @@ func TestParse(t *testing.T) {
 
 	for i, c := range cases {
 		b := bytes.NewBufferString(c.in)
-		got, err := Parse(b)
+		got, err := ParseFirst(b)
 		if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
 			t.Errorf("case %d error mismatch. expected: %s, got: %s", i, c.err, err)
 			continue

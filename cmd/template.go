@@ -90,7 +90,7 @@ var TemplateCmd = &cobra.Command{
 			}
 		}
 
-		var docs []*lib.Doc
+		var docs lib.Docs
 		for _, fp := range args {
 			f, err := os.Open(fp)
 			if err != nil {
@@ -98,12 +98,21 @@ var TemplateCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			doc, err := lib.Parse(f)
+			read, err := lib.Parse(f)
 			if err != nil {
 				fmt.Println(err.Error())
 				os.Exit(1)
 			}
-			docs = append(docs, doc)
+			docs = append(docs, read...)
+		}
+
+		noSort, err := cmd.Flags().GetBool("no-sort")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		if !noSort {
+			docs.Sort()
 		}
 
 		if err := t.Execute(os.Stdout, docs); err != nil {
@@ -114,6 +123,6 @@ var TemplateCmd = &cobra.Command{
 }
 
 func init() {
-	// TemplateCmd.Flags().StringP("preset", "p", "markdown", "use pre-configured template file")
 	TemplateCmd.Flags().StringP("template", "t", "", "template file to load. overrides preset")
+	TemplateCmd.Flags().Bool("no-sort", false, "don't alpha-sort fields & outline documents")
 }
