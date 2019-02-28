@@ -57,7 +57,6 @@ type parser struct {
 
 func (p *parser) scan() (tok Token) {
 	if p.buf.n > 0 {
-		// fmt.Printf("using scan buffer %s %#v\n", p.buf.tok.Type, p.buf.tok)
 		tok = p.buf.tok
 		p.indent = p.buf.indent
 		p.line = p.buf.line
@@ -82,7 +81,6 @@ func (p *parser) scan() (tok Token) {
 		case eofTok:
 			return
 		default:
-			// fmt.Printf("returning token: %s %#v\n", tok.Type, tok.Text)
 			return
 		}
 	}
@@ -183,7 +181,6 @@ func (p *parser) readFunction(receiver string, baseIndent int) (fn *Function, er
 			return
 		}
 
-		// fmt.Printf("%s %s\n", tok.Type, tok.Text)
 		switch tok.Type {
 		case ParamsTok:
 			if fn.Params, err = p.readParams(p.indent); err != nil {
@@ -314,6 +311,8 @@ func (p *parser) readField(baseIndent int) (field *Field, err error) {
 	} else {
 		field = &Field{Name: tok.Text}
 	}
+
+	field.Description, err = p.readMultilineText(baseIndent + 1)
 	return
 }
 

@@ -60,6 +60,7 @@ outline: time
              d duration
       fields:
         hours float
+          number of hours starting at zero
         minutes float
         nanoseconds int
         seconds float
@@ -97,7 +98,7 @@ var time = &Doc{
 				},
 			},
 			Fields: []*Field{
-				{Name: "hours float"},
+				{Name: "hours float", Description: "number of hours starting at zero"},
 				{Name: "minutes float"},
 				{Name: "nanoseconds int"},
 				{Name: "seconds float"},
