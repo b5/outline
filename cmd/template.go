@@ -17,7 +17,9 @@ var mdIndex = strings.Replace(`{{- define "mdFn" }}
 {{ .Description }}
 {{- end -}}
 {{- if gt (len .Params) 0 }}
+
 **parameters:**
+
 | name | type | description |
 |------|------|-------------|
 {{ range .Params -}}
@@ -43,7 +45,9 @@ var mdIndex = strings.Replace(`{{- define "mdFn" }}
 ### '{{ .Name }}'
 {{ if ne .Description "" }}{{ .Description }}{{ end -}}
 {{ if gt (len .Fields) 0 }}
+
 **Fields**
+
 | name | type | description |
 |------|------|-------------|
 {{ range .Fields -}}
@@ -56,7 +60,9 @@ var mdIndex = strings.Replace(`{{- define "mdFn" }}
 {{ template "mdFn" . }}
 {{ end -}}
 {{- if gt (len .Operators) 0 }}
+
 **Operators**
+
 | operator | description |
 |----------|-------------|
 {{ range .Operators -}}
