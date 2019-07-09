@@ -36,5 +36,6 @@ func init() {
 	RootCmd.AddCommand(
 		FmtCmd,
 		TemplateCmd,
+		PackageCmd,
 	)
 }
