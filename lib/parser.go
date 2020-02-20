@@ -265,7 +265,7 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 			if t.Fields, err = p.readFields(p.indent); err != nil {
 				return
 			}
-		case MethodsTok:
+		case MethodsTok, FunctionsTok:
 			if t.Methods, err = p.readFunctions(t.Name, p.indent); err != nil {
 				return
 			}
