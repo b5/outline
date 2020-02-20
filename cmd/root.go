@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/qri-io/walk/lib"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +16,7 @@ var RootCmd = &cobra.Command{
 	Short: "outline is a tool for outlining software packages",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if debug, err := cmd.Flags().GetBool("debug"); err == nil && debug {
-			lib.SetLogLevel("debug")
+			logrus.SetLevel(logrus.DebugLevel)
 		}
 	},
 }
