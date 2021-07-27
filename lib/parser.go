@@ -119,7 +119,6 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 			return
 		}
 
-		// fmt.Printf("%s %s\n", tok.Type, tok.Text)
 		switch tok.Type {
 		case DocumentTok:
 			if p.indent == baseIndent {
@@ -173,7 +172,13 @@ func (p *parser) readFunction(receiver string, baseIndent int) (fn *Function, er
 		return
 	}
 
-	fn = &Function{Receiver: receiver, Signature: tok.Text}
+	funcName := ""
+	pos := strings.Index(tok.Text, "(")
+	if pos != -1 {
+		funcName = tok.Text[:pos]
+	}
+
+	fn = &Function{FuncName: funcName, Receiver: receiver, Signature: tok.Text}
 	for {
 		tok := p.scan()
 		if p.indent <= baseIndent {
@@ -339,7 +344,6 @@ func (p *parser) readOperator(baseIndent int) (op *Operator, err error) {
 func (p *parser) readMultilineText(baseIndent int) (str string, err error) {
 	for {
 		tok := p.scan()
-		// fmt.Printf("readMultilineText base: %d indent: %d %s %#v\n", baseIndent, p.indent, tok.Type, tok.Text)
 		if p.indent < baseIndent || tok.Type != TextTok {
 			p.unscan()
 			return
