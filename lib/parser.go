@@ -223,15 +223,16 @@ func (p *parser) readParam(baseIndent int) (param *Param, err error) {
 		p.unscan()
 		return
 	}
-	// TODO (b5): hack. acutally parse this stuff using the lexer
+
 	spl := strings.Split(tok.Text, " ")
-	if len(spl) > 0 {
+	switch len(spl) {
+	default:
+		param = &Param{Name: tok.Text}
+	case 2:
 		param = &Param{
 			Name: spl[0],
 			Type: spl[1],
 		}
-	} else {
-		param = &Param{Name: tok.Text}
 	}
 
 	param.Description, err = p.readMultilineText(baseIndent + 1)
@@ -306,15 +307,16 @@ func (p *parser) readField(baseIndent int) (field *Field, err error) {
 		p.unscan()
 		return
 	}
-	// TODO (b5): hack. acutally parse this stuff using the lexer
+
 	spl := strings.Split(tok.Text, " ")
-	if len(spl) > 0 {
+	switch len(spl) {
+	case 1:
+		field = &Field{Name: tok.Text}
+	case 2:
 		field = &Field{
 			Name: spl[0],
 			Type: spl[1],
 		}
-	} else {
-		field = &Field{Name: tok.Text}
 	}
 
 	field.Description, err = p.readMultilineText(baseIndent + 1)
