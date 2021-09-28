@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -237,7 +238,7 @@ func TestParse(t *testing.T) {
 				t.Fatal("doc returned nil")
 			}
 
-			if diff := cmp.Diff(c.exp, got); diff != "" {
+			if diff := cmp.Diff(c.exp, got, cmpopts.IgnoreUnexported(Doc{})); diff != "" {
 				t.Errorf("result mismatch (-want +got):\n%s", diff)
 			}
 
@@ -246,12 +247,6 @@ func TestParse(t *testing.T) {
 			if diff := cmp.Diff(string(expB), string(gotB)); diff != "" {
 				t.Errorf("result mismatch (-want +got):\n%s", diff)
 			}
-			// if string(expB) != string(gotB) {
-			// 	t.Errorf("case %d equality mismatch. expected:\n%s\ngot:\n%s\n", i, string(expB), string(gotB))
-			// 	t.Log("\n", gotB, "\n", expB)
-			// 	diffs := differ.DiffMain(string(gotB), string(expB), true)
-			// 	t.Log(differ.DiffPrettyText(diffs))
-			// }
 		})
 	}
 }
