@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -27,12 +28,15 @@ var twoFuncs = &Doc{
 	Name: "twoFuncs",
 	Path: "twoFuncs",
 	Functions: []*Function{
-		{
+		{FuncName: "difference",
 			Signature: "difference(a,b int) int",
+			Receiver:  "twoFuncs",
 		},
 		{
+			FuncName:    "sum",
 			Signature:   "sum(a,b int) int",
 			Description: "add two things together",
+			Receiver:    "twoFuncs",
 		},
 	},
 }
@@ -63,7 +67,8 @@ outline: time
           number of hours starting at zero
         minutes float
         nanoseconds int
-        seconds float
+        seconds
+          number of seconds starting at zero
       operators:
         duration - time = duration
         duration + time = time
@@ -78,30 +83,40 @@ outline: time
 var time = &Doc{
 	Name: "time",
 	Functions: []*Function{
-		{Signature: "duration(string) duration",
-			Description: "parse a duration"},
-		{Signature: "time(string, format=..., location=...) time",
-			Description: "parse a time"},
-		{Signature: "now() time",
-			Description: "new time instance set to current time implementations are able to make this a constant"},
-		{Signature: "zero() time",
-			Description: "a constant"},
+		{FuncName: "duration",
+			Signature:   "duration(string) duration",
+			Description: "parse a duration",
+			Receiver:    "time"},
+		{FuncName: "time",
+			Signature:   "time(string, format=..., location=...) time",
+			Description: "parse a time",
+			Receiver:    "time"},
+		{FuncName: "now",
+			Signature:   "now() time",
+			Description: "new time instance set to current time implementations are able to make this a constant",
+			Receiver:    "time"},
+		{FuncName: "zero",
+			Signature:   "zero() time",
+			Description: "a constant",
+			Receiver:    "time"},
 	},
 	Types: []*Type{
 		{Name: "duration",
 			Description: "a period of time",
 			Methods: []*Function{
-				{Signature: "add(d duration) int",
+				{FuncName: "add",
+					Receiver:  "duration",
+					Signature: "add(d duration) int",
 					Params: []*Param{
 						{Name: "d", Type: "duration"},
 					},
 				},
 			},
 			Fields: []*Field{
-				{Name: "hours float", Description: "number of hours starting at zero"},
-				{Name: "minutes float"},
-				{Name: "nanoseconds int"},
-				{Name: "seconds float"},
+				{Name: "hours", Type: "float", Description: "number of hours starting at zero"},
+				{Name: "minutes", Type: "float"},
+				{Name: "nanoseconds", Type: "int"},
+				{Name: "seconds", Description: "number of seconds starting at zero"},
 			},
 			Operators: []*Operator{
 				{Opr: "duration - time = duration"},
@@ -111,7 +126,6 @@ var time = &Doc{
 			},
 		},
 		{Name: "time",
-			Fields: []*Field{},
 			Operators: []*Operator{
 				{Opr: "time == time = boolean"},
 				{Opr: "time < time = boolean"},
@@ -130,7 +144,7 @@ var docWithDescription = &Doc{
 	Name:        "doc",
 	Description: "this is a document description. It's written across two lines",
 	Functions: []*Function{
-		{Signature: "sum(a int, b int) int"},
+		{FuncName: "sum", Signature: "sum(a int, b int) int", Receiver: "doc"},
 	},
 }
 
@@ -149,51 +163,95 @@ var huh = &Doc{
 	Name:        "huh",
 	Description: "huh is a package that has no meaning or purpose",
 	Functions: []*Function{
-		{Signature: "foo(bar string) int",
+		{FuncName: "foo",
+			Receiver:    "huh",
+			Signature:   "foo(bar string) int",
 			Description: "foo a bar, which is to to a bar and remove 'd' from 'food'",
 			Params: []*Param{
 				{Name: "bar", Type: "string", Description: "the name of a bar"},
 			},
 		},
-		{Signature: "date() date",
-			Description: "make a date"},
+		{FuncName: "date",
+			Signature:   "date() date",
+			Description: "make a date",
+			Receiver:    "huh"},
+	},
+}
+
+const dataframeTabs = `
+outline: dataframe
+dataframe is a 2d columnar data structure that provides analysis and manipulation tools
+path: dataframe
+functions:
+	DataFrame(data, index, columns, dtype) DataFrame
+		constructs a DataFrame
+		params:
+			data any
+				data for the content of the DataFrame
+			index
+				index for the rows of the DataFrame
+`
+
+var dataframe = &Doc{
+	Name:        "dataframe",
+	Description: "dataframe is a 2d columnar data structure that provides analysis and manipulation tools",
+	Path:        "dataframe",
+	Functions: []*Function{
+		{FuncName: "DataFrame",
+			Signature:   "DataFrame(data, index, columns, dtype) DataFrame",
+			Description: "constructs a DataFrame",
+			Receiver:    "dataframe",
+			Params: []*Param{
+				{Name: "data", Type: "any", Description: "data for the content of the DataFrame"},
+				{Name: "index", Type: "", Description: "index for the rows of the DataFrame"},
+			},
+		},
 	},
 }
 
 func TestParse(t *testing.T) {
 	cases := []struct {
-		in  string
-		exp *Doc
-		err string
+		name string
+		in   string
+		exp  *Doc
+		err  string
 	}{
-		{"outline: foo\n", &Doc{Name: "foo"}, ""},
-		{twoFuncsTabs, twoFuncs, ""},
-		{twoFuncsSpaces, twoFuncs, ""},
-		{timeSpaces, time, ""},
-		{docWithDescriptionTabs, docWithDescription, ""},
-		{huhSpaces, huh, ""},
+		{"basic", "outline: foo\n", &Doc{Name: "foo"}, ""},
+		{"two_funcs_tabs", twoFuncsTabs, twoFuncs, ""},
+		{"two_funcs_spaces", twoFuncsSpaces, twoFuncs, ""},
+		{"time", timeSpaces, time, ""},
+		{"doc_with_description", docWithDescriptionTabs, docWithDescription, ""},
+		{"huh", huhSpaces, huh, ""},
+		{"dataframe", dataframeTabs, dataframe, ""},
 	}
 
-	for i, c := range cases {
-		b := bytes.NewBufferString(c.in)
-		got, err := ParseFirst(b)
-		if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
-			t.Errorf("case %d error mismatch. expected: %s, got: %s", i, c.err, err)
-			continue
-		}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			b := bytes.NewBufferString(c.in)
+			got, err := ParseFirst(b)
+			if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
+				t.Fatalf("error mismatch. expected: %s, got: %s", c.err, err)
+			}
 
-		if got == nil {
-			t.Errorf("case %d doc returned nil", i)
-			continue
-		}
+			if got == nil {
+				t.Fatal("doc returned nil")
+			}
 
-		gotB, _ := got.MarshalIndent(0, "  ")
-		expB, _ := c.exp.MarshalIndent(0, "  ")
-		if string(expB) != string(gotB) {
-			t.Errorf("case %d equality mismatch. expected:\n%s\ngot:\n%s\n", i, string(expB), string(gotB))
-			t.Log("\n", gotB, "\n", expB)
-			diffs := differ.DiffMain(string(gotB), string(expB), true)
-			t.Log(differ.DiffPrettyText(diffs))
-		}
+			if diff := cmp.Diff(c.exp, got); diff != "" {
+				t.Errorf("result mismatch (-want +got):\n%s", diff)
+			}
+
+			gotB, _ := got.MarshalIndent(0, "  ")
+			expB, _ := c.exp.MarshalIndent(0, "  ")
+			if diff := cmp.Diff(string(expB), string(gotB)); diff != "" {
+				t.Errorf("result mismatch (-want +got):\n%s", diff)
+			}
+			// if string(expB) != string(gotB) {
+			// 	t.Errorf("case %d equality mismatch. expected:\n%s\ngot:\n%s\n", i, string(expB), string(gotB))
+			// 	t.Log("\n", gotB, "\n", expB)
+			// 	diffs := differ.DiffMain(string(gotB), string(expB), true)
+			// 	t.Log(differ.DiffPrettyText(diffs))
+			// }
+		})
 	}
 }
