@@ -96,6 +96,16 @@ var TemplateCmd = &cobra.Command{
 			}
 		}
 
+		var options []lib.Option
+		shouldSort, err := cmd.Flags().GetBool("sort")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		if shouldSort {
+			options = append(options, lib.AlphaSortFuncs(), lib.AlphaSortTypes())
+		}
+
 		var docs lib.Docs
 		for _, fp := range args {
 			f, err := os.Open(fp)
@@ -104,7 +114,7 @@ var TemplateCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			read, err := lib.Parse(f)
+			read, err := lib.Parse(f, options...)
 			if err != nil {
 				fmt.Println(err.Error())
 				os.Exit(1)

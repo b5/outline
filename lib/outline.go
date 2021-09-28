@@ -30,6 +30,7 @@ func (d Docs) Sort() {
 
 // Doc is is a documentation document
 type Doc struct {
+	cfg         config
 	Name        string
 	Path        string
 	Description string
@@ -39,8 +40,12 @@ type Doc struct {
 
 // Sort sorts all sortable fields in the document
 func (d *Doc) Sort() {
-	sort.Sort(d.Functions)
-	sort.Sort(d.Types)
+	if d.cfg.alphaSortFuncs {
+		sort.Sort(d.Functions)
+	}
+	if d.cfg.alphaSortTypes {
+		sort.Sort(d.Types)
+	}
 }
 
 // MarshalIndent writes doc to a string with depth & prefix

@@ -9,8 +9,8 @@ import (
 // ParseFirst consumes a reader of outline data, creating and returning the first outline document
 // it encounters. ParseFirst consumes the entire reader
 // TODO(b5): don't consume the entire reader. return after the first complete document
-func ParseFirst(r io.Reader) (doc *Doc, err error) {
-	docs, err := Parse(r)
+func ParseFirst(r io.Reader, opts ...Option) (doc *Doc, err error) {
+	docs, err := Parse(r, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +23,12 @@ func ParseFirst(r io.Reader) (doc *Doc, err error) {
 
 // Parse consumes a reader of data that contains zero or more outlines
 // creating and returning any documents it finds
-func Parse(r io.Reader) (docs Docs, err error) {
-	p := parser{s: newScanner(r)}
+func Parse(r io.Reader, opts ...Option) (docs Docs, err error) {
+	cfg, err := parseOptions(opts)
+	if err != nil {
+		return docs, err
+	}
+	p := parser{s: newScanner(r), cfg: cfg}
 	for {
 		doc, err := p.read()
 		if doc == nil && err == nil {
@@ -43,7 +47,8 @@ func Parse(r io.Reader) (docs Docs, err error) {
 
 // parser is a state machine for serializing a documentation struct from a byte stream
 type parser struct {
-	s *scanner
+	s   *scanner
+	cfg config
 
 	buf struct {
 		tok          Token
@@ -104,7 +109,7 @@ func (p *parser) read() (doc *Doc, err error) {
 }
 
 func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
-	doc = &Doc{}
+	doc = &Doc{cfg: p.cfg}
 	tok := p.scan()
 	if tok.Type == TextTok {
 		doc.Name = tok.Text
