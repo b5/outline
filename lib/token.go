@@ -38,8 +38,12 @@ const (
 
 	// KeywordBegin marks the end of keyword tokens in the token enumeration
 	KeywordBegin
+	// CodeTok is the "code:" token
+	CodeTok
 	// DocumentTok is the "document:" token
 	DocumentTok
+	// ExamplesTok is the "examples:" token
+	ExamplesTok
 	// PathTok is the "path:" token
 	PathTok
 	// FunctionsTok is the "functions:" token
@@ -74,6 +78,10 @@ func (t TokenType) String() string {
 		return "path"
 	case MethodsTok:
 		return "methods"
+	case ExamplesTok:
+		return "examples"
+	case CodeTok:
+		return "code"
 	case FunctionsTok:
 		return "functions"
 	case TypesTok:

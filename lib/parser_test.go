@@ -233,6 +233,43 @@ var ignoreOuter = &Doc{
 	Description: "a time package",
 }
 
+const withExamplesText = `outline: http
+functions:
+	get(url, headers?): Response
+		params:
+			url string
+			headers dict
+		examples:
+			simple
+				do a simple URL fetch
+				code:
+					res = http.get("https://example.com")
+					print(res.status_code)                  # Output: 200
+			with headers
+				fetch, but send custom headers
+				code:
+					res = http.get("https://example.com", { "UserAgent": "myAgent" })
+					print(res.status_code)                  # Output: 200
+`
+
+var withExamples = &Doc{
+	Name: "http",
+	Functions: []*Function{
+		{FuncName: "get",
+			Receiver:  "http",
+			Signature: "get(url, headers?): Response",
+			Params: []*Param{
+				{Name: "url", Type: "string"},
+				{Name: "headers", Type: "dict"},
+			},
+			Examples: []*Example{
+				{Name: "simple", Description: "do a simple URL fetch", Code: "res = http.get(\"https://example.com\")\nprint(res.status_code)                  # Output: 200"},
+				{Name: "with headers", Description: "fetch, but send custom headers", Code: "res = http.get(\"https://example.com\", { \"UserAgent\": \"myAgent\" })\nprint(res.status_code)                  # Output: 200"},
+			},
+		},
+	},
+}
+
 func TestParse(t *testing.T) {
 	cases := []struct {
 		name string
@@ -248,6 +285,7 @@ func TestParse(t *testing.T) {
 		{"huh", huhSpaces, huh, ""},
 		{"dataframe", dataframeTabs, dataframe, ""},
 		{"leading_and_trailing", ignoreOuterText, ignoreOuter, ""},
+		{"examples", withExamplesText, withExamples, ""},
 	}
 
 	for _, c := range cases {
