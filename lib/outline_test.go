@@ -49,7 +49,7 @@ const unsorted = `
 					time < time = boolean`
 
 func TestSort(t *testing.T) {
-	docs, err := Parse(strings.NewReader(unsorted))
+	docs, err := Parse(strings.NewReader(unsorted), AlphaSortFuncs(), AlphaSortTypes())
 	if err != nil {
 		t.Fatal(err)
 	}

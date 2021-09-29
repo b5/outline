@@ -210,6 +210,24 @@ var dataframe = &Doc{
 	},
 }
 
+const ignoreLeadingText = `
+/*Package time provides time-related constants and functions. The time module
+was upstreamed from starlib into go-Starlark. This package exists to add
+documentation. The API is locked to strictly match the Starlark module.
+Users are encouraged to import the time package directly via:
+go.starlark.net/lib/time
+
+For source code see
+https://github.com/google/starlark-go/tree/master/lib/time
+
+outline: time
+	a time package`
+
+var ignoreLeading = &Doc{
+	Name:        "time",
+	Description: "a time package",
+}
+
 func TestParse(t *testing.T) {
 	cases := []struct {
 		name string
@@ -224,6 +242,7 @@ func TestParse(t *testing.T) {
 		{"doc_with_description", docWithDescriptionTabs, docWithDescription, ""},
 		{"huh", huhSpaces, huh, ""},
 		{"dataframe", dataframeTabs, dataframe, ""},
+		{"leading", ignoreLeadingText, ignoreLeading, ""},
 	}
 
 	for _, c := range cases {

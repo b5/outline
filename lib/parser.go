@@ -34,6 +34,7 @@ func Parse(r io.Reader, opts ...Option) (docs Docs, err error) {
 		if doc == nil && err == nil {
 			return docs, nil
 		}
+		doc.Sort()
 		docs = append(docs, doc)
 		if err != nil {
 			if err == io.EOF {
