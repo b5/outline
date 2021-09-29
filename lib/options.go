@@ -18,7 +18,7 @@ func (o alphaSortTypes) apply(cfg *config) error {
 	return nil
 }
 
-func AlphaSortFuncs() Option { return alphaSortTypes{} }
+func AlphaSortFuncs() Option { return alphaSortFuncs{} }
 
 type alphaSortFuncs struct{}
 

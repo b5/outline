@@ -147,12 +147,15 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 				return
 			}
 		case TextTok:
-			p.unscan()
-			text, err := p.readMultilineText(p.indent)
-			if err != nil {
-				return doc, err
+			// only read descriptions when indented
+			if p.indent > baseIndent {
+				p.unscan()
+				text, err := p.readMultilineText(p.indent)
+				if err != nil {
+					return doc, err
+				}
+				doc.Description = text
 			}
-			doc.Description = text
 		default:
 			p.unscan()
 			return

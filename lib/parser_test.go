@@ -149,7 +149,7 @@ var docWithDescription = &Doc{
 	},
 }
 
-const huhSpaces = `  outline: huh
+const huhSpaces = `outline: huh
   huh is a package that has no meaning or purpose
   functions:
     foo(bar string) int
@@ -181,7 +181,7 @@ var huh = &Doc{
 
 const dataframeTabs = `
 outline: dataframe
-dataframe is a 2d columnar data structure that provides analysis and manipulation tools
+	dataframe is a 2d columnar data structure that provides analysis and manipulation tools
 path: dataframe
 functions:
 	DataFrame(data, index, columns, dtype) DataFrame
@@ -210,7 +210,7 @@ var dataframe = &Doc{
 	},
 }
 
-const ignoreLeadingText = `
+const ignoreOuterText = `
 /*Package time provides time-related constants and functions. The time module
 was upstreamed from starlib into go-Starlark. This package exists to add
 documentation. The API is locked to strictly match the Starlark module.
@@ -221,9 +221,14 @@ For source code see
 https://github.com/google/starlark-go/tree/master/lib/time
 
 outline: time
-	a time package`
+	a time package
 
-var ignoreLeading = &Doc{
+*/
+package time
+import "go.starlark.net/lib/time"
+`
+
+var ignoreOuter = &Doc{
 	Name:        "time",
 	Description: "a time package",
 }
@@ -242,7 +247,7 @@ func TestParse(t *testing.T) {
 		{"doc_with_description", docWithDescriptionTabs, docWithDescription, ""},
 		{"huh", huhSpaces, huh, ""},
 		{"dataframe", dataframeTabs, dataframe, ""},
-		{"leading", ignoreLeadingText, ignoreLeading, ""},
+		{"leading_and_trailing", ignoreOuterText, ignoreOuter, ""},
 	}
 
 	for _, c := range cases {
