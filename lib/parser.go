@@ -34,6 +34,7 @@ func Parse(r io.Reader, opts ...Option) (docs Docs, err error) {
 		if doc == nil && err == nil {
 			return docs, nil
 		}
+		doc.Sort()
 		docs = append(docs, doc)
 		if err != nil {
 			if err == io.EOF {
@@ -146,12 +147,15 @@ func (p *parser) readDocument(baseIndent int) (doc *Doc, err error) {
 				return
 			}
 		case TextTok:
-			p.unscan()
-			text, err := p.readMultilineText(p.indent)
-			if err != nil {
-				return doc, err
+			// only read descriptions when indented
+			if p.indent > baseIndent {
+				p.unscan()
+				text, err := p.readMultilineText(p.indent)
+				if err != nil {
+					return doc, err
+				}
+				doc.Description = text
 			}
-			doc.Description = text
 		default:
 			p.unscan()
 			return
@@ -199,6 +203,10 @@ func (p *parser) readFunction(receiver string, baseIndent int) (fn *Function, er
 		case ReturnTok:
 			if fn.Return, err = p.readMultilineText(p.indent); err != nil {
 				return
+			}
+		case ExamplesTok:
+			if fn.Examples, err = p.readExamples(p.indent); err != nil {
+				return fn, err
 			}
 		case TextTok:
 			p.unscan()
@@ -360,6 +368,65 @@ func (p *parser) readMultilineText(baseIndent int) (str string, err error) {
 			str = tok.Text
 		} else {
 			str += " " + tok.Text
+		}
+	}
+}
+
+func (p *parser) readTextBlock(baseIndent int) (str string, err error) {
+	for {
+		tok := p.scan()
+		if p.indent < baseIndent || tok.Type != TextTok {
+			p.unscan()
+			return
+		}
+
+		if str == "" {
+			str = tok.Text
+		} else {
+			str += "\n" + tok.Text
+		}
+	}
+}
+
+func (p *parser) readExamples(baseIndent int) (egs []*Example, err error) {
+	for {
+		var eg *Example
+		if eg, err = p.readExample(baseIndent + 1); err != nil || eg == nil {
+			return egs, err
+		}
+		egs = append(egs, eg)
+	}
+}
+
+func (p *parser) readExample(baseIndent int) (eg *Example, err error) {
+	// read name
+	tok := p.scan()
+	if p.indent < baseIndent || tok.Type != TextTok {
+		p.unscan()
+		return nil, nil
+	}
+
+	eg = &Example{Name: tok.Text}
+	for {
+		tok := p.scan()
+		if p.indent <= baseIndent {
+			p.unscan()
+			return
+		}
+
+		switch tok.Type {
+		case CodeTok:
+			if eg.Code, err = p.readTextBlock(p.indent); err != nil {
+				return eg, err
+			}
+		case TextTok:
+			p.unscan()
+			if eg.Description, err = p.readMultilineText(p.indent); err != nil {
+				return eg, err
+			}
+		default:
+			p.unscan()
+			return eg, nil
 		}
 	}
 }

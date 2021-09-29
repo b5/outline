@@ -76,6 +76,10 @@ func (s *scanner) Scan() Token {
 				return s.newTok(ParamsTok)
 			case "return":
 				return s.newTok(ReturnTok)
+			case "code":
+				return s.newTok(CodeTok)
+			case "examples":
+				return s.newTok(ExamplesTok)
 			default:
 				s.text.WriteRune(':')
 			}

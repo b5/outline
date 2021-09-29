@@ -134,6 +134,7 @@ type Function struct {
 	Description string
 	Params      []*Param
 	Return      string
+	Examples    []*Example
 }
 
 // Param is an argument to a function
@@ -181,4 +182,10 @@ type Field struct {
 type Operator struct {
 	Opr         string
 	Description string
+}
+
+type Example struct {
+	Name        string
+	Description string
+	Code        string
 }

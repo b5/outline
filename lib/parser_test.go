@@ -149,7 +149,7 @@ var docWithDescription = &Doc{
 	},
 }
 
-const huhSpaces = `  outline: huh
+const huhSpaces = `outline: huh
   huh is a package that has no meaning or purpose
   functions:
     foo(bar string) int
@@ -181,7 +181,7 @@ var huh = &Doc{
 
 const dataframeTabs = `
 outline: dataframe
-dataframe is a 2d columnar data structure that provides analysis and manipulation tools
+	dataframe is a 2d columnar data structure that provides analysis and manipulation tools
 path: dataframe
 functions:
 	DataFrame(data, index, columns, dtype) DataFrame
@@ -210,6 +210,66 @@ var dataframe = &Doc{
 	},
 }
 
+const ignoreOuterText = `
+/*Package time provides time-related constants and functions. The time module
+was upstreamed from starlib into go-Starlark. This package exists to add
+documentation. The API is locked to strictly match the Starlark module.
+Users are encouraged to import the time package directly via:
+go.starlark.net/lib/time
+
+For source code see
+https://github.com/google/starlark-go/tree/master/lib/time
+
+outline: time
+	a time package
+
+*/
+package time
+import "go.starlark.net/lib/time"
+`
+
+var ignoreOuter = &Doc{
+	Name:        "time",
+	Description: "a time package",
+}
+
+const withExamplesText = `outline: http
+functions:
+	get(url, headers?): Response
+		params:
+			url string
+			headers dict
+		examples:
+			simple
+				do a simple URL fetch
+				code:
+					res = http.get("https://example.com")
+					print(res.status_code)                  # Output: 200
+			with headers
+				fetch, but send custom headers
+				code:
+					res = http.get("https://example.com", { "UserAgent": "myAgent" })
+					print(res.status_code)                  # Output: 200
+`
+
+var withExamples = &Doc{
+	Name: "http",
+	Functions: []*Function{
+		{FuncName: "get",
+			Receiver:  "http",
+			Signature: "get(url, headers?): Response",
+			Params: []*Param{
+				{Name: "url", Type: "string"},
+				{Name: "headers", Type: "dict"},
+			},
+			Examples: []*Example{
+				{Name: "simple", Description: "do a simple URL fetch", Code: "res = http.get(\"https://example.com\")\nprint(res.status_code)                  # Output: 200"},
+				{Name: "with headers", Description: "fetch, but send custom headers", Code: "res = http.get(\"https://example.com\", { \"UserAgent\": \"myAgent\" })\nprint(res.status_code)                  # Output: 200"},
+			},
+		},
+	},
+}
+
 func TestParse(t *testing.T) {
 	cases := []struct {
 		name string
@@ -224,6 +284,8 @@ func TestParse(t *testing.T) {
 		{"doc_with_description", docWithDescriptionTabs, docWithDescription, ""},
 		{"huh", huhSpaces, huh, ""},
 		{"dataframe", dataframeTabs, dataframe, ""},
+		{"leading_and_trailing", ignoreOuterText, ignoreOuter, ""},
+		{"examples", withExamplesText, withExamples, ""},
 	}
 
 	for _, c := range cases {

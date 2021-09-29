@@ -3,6 +3,8 @@ package lib
 import (
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 const unsorted = `
@@ -49,30 +51,28 @@ const unsorted = `
 					time < time = boolean`
 
 func TestSort(t *testing.T) {
-	docs, err := Parse(strings.NewReader(unsorted))
+	docs, err := Parse(strings.NewReader(unsorted), AlphaSortFuncs(), AlphaSortTypes())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	docs.Sort()
-	data, err := docs[0].MarshalIndent(0, "  ")
+	data, err := docs[0].MarshalIndent(0, "\t")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("TODO: Check these strings. They're ok, but, like, computers")
-	t.Log(string(data))
-	// if expectA != string(data) {
-	// 	t.Errorf("doc 0 mismatch")
-	// }
+	if diff := cmp.Diff(expectA, string(data)); diff != "" {
+		t.Errorf("serialized output mismatch (-want +got):\n%s", diff)
+	}
 
-	data, err = docs[1].MarshalIndent(0, "  ")
+	data, err = docs[1].MarshalIndent(0, "\t")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(string(data))
-	// if expectB != string(data) {
-	// 	t.Errorf("doc 1 mismatch")
-	// }
+	if diff := cmp.Diff(expectB, string(data)); diff != "" {
+		t.Errorf("serialized output mismatch (-want +got):\n%s", diff)
+	}
 }
 
 const expectA = `outline: time
@@ -93,11 +93,13 @@ const expectA = `outline: time
 				minutes float
 				nanoseconds int
 				seconds float
-		time`
+		time
+`
 
 const expectB = `outline: twoFuncs
 	path: twoFuncs
 	functions:
 		difference(a,b int) int
 		sum(a,b int) int
-			add two things together`
+			add two things together
+`

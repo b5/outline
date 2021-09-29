@@ -122,15 +122,6 @@ var TemplateCmd = &cobra.Command{
 			docs = append(docs, read...)
 		}
 
-		noSort, err := cmd.Flags().GetBool("no-sort")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		if !noSort {
-			docs.Sort()
-		}
-
 		if err := t.Execute(os.Stdout, docs); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
@@ -140,5 +131,5 @@ var TemplateCmd = &cobra.Command{
 
 func init() {
 	TemplateCmd.Flags().StringP("template", "t", "", "template file to load. overrides preset")
-	TemplateCmd.Flags().Bool("no-sort", false, "don't alpha-sort fields & outline documents")
+	TemplateCmd.Flags().Bool("sort", false, "alpha-sort fields & outline documents")
 }
