@@ -210,7 +210,7 @@ func (p *parser) readFunction(receiver string, baseIndent int) (fn *Function, er
 			}
 		case TextTok:
 			p.unscan()
-			if fn.Description, err = p.readMultilineText(p.indent); err != nil {
+			if fn.Description, err = p.readTextBlock(p.indent); err != nil {
 				return
 			}
 		default:
@@ -294,7 +294,7 @@ func (p *parser) readType(baseIndent int) (t *Type, err error) {
 			}
 		case TextTok:
 			p.unscan()
-			if t.Description, err = p.readMultilineText(p.indent); err != nil {
+			if t.Description, err = p.readTextBlock(p.indent); err != nil {
 				return
 			}
 		default:
@@ -421,7 +421,7 @@ func (p *parser) readExample(baseIndent int) (eg *Example, err error) {
 			}
 		case TextTok:
 			p.unscan()
-			if eg.Description, err = p.readMultilineText(p.indent); err != nil {
+			if eg.Description, err = p.readTextBlock(p.indent); err != nil {
 				return eg, err
 			}
 		default:
