@@ -48,6 +48,25 @@ func (d *Doc) Sort() {
 	}
 }
 
+// Examples returns a slice of all examples defined in the document
+func (d *Doc) Examples() (egs []*Example) {
+	for _, f := range d.Functions {
+		if len(f.Examples) > 0 {
+			egs = append(egs, f.Examples...)
+		}
+	}
+
+	for _, t := range d.Types {
+		for _, m := range t.Methods {
+			if len(m.Examples) > 0 {
+				egs = append(egs, m.Examples...)
+			}
+		}
+	}
+
+	return egs
+}
+
 // MarshalIndent writes doc to a string with depth & prefix
 func (d *Doc) MarshalIndent(depth int, prefix string) ([]byte, error) {
 	buf := &bytes.Buffer{}
